@@ -26,9 +26,42 @@ namespace ConsoleApp
             //ProjectSomeProperties();
             //ProjectSomeSamuraiWithQuotes();
             //ExplicitLoadQuotes();
-            ModifyingRelatedDataWhenTracked();
+            //ModifyingRelatedDataWhenTracked();
+            //GetSamuraisWithBattles();
+            ReplaceAHorse();
             Console.Write("Press any key...");
             Console.ReadKey();
+        }
+
+        private static void ReplaceAHorse()
+        {
+            var samurai = _context.Samurais.Include(s => s.Horse).FirstOrDefault(s => s.Id == 7);
+            samurai.Horse = new Horse { Name = "Rocinante" };
+            _context.SaveChanges();
+        }
+
+        private static void AddNewSamuraiWithHorse()
+        {
+            var samurai = new Samurai { Name = "Jian Ujichika" };
+            samurai.Horse = new Horse { Name = "Silver" };
+            _context.Samurais.Add(samurai);
+            _context.SaveChanges();
+        }
+
+        private static void GetSamuraisWithBattles()
+        {
+            var samuraiWithBattles = _context.Samurais
+                .Include(s => s.SamuraiBattles)
+                .ThenInclude(sb => sb.Battle)
+                .FirstOrDefault(samurai => samurai.Id == 1);
+
+            var samuraiWithBattlesCleaner = _context.Samurais.Where(samurai => samurai.Id == 1)
+                .Select(s => new
+                {
+                    samurai = s,
+                    battles = s.SamuraiBattles.Select(sb => sb.Battle)
+                })
+                .FirstOrDefault();
         }
 
         private static void ModifyingRelatedDataWhenTracked()
